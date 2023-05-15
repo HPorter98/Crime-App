@@ -1,0 +1,35 @@
+.searchBar {
+    margin-top: 10px;
+    background-color: pink;
+    height: 75px;
+    width: 50%;
+    padding: 15px;
+}
+
+.searchBar input{
+}
+
+.searchBar label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.searchBar select {
+    width: auto;
+    margin-right: 10px;
+}
+
+.searchBar button {
+    background-color: rgba(18, 170, 31, 1);
+    width: 100px;
+    height: 30px;
+    border-radius: 5px;
+    font-size: .90em;
+    font-weight: bold;
+    
+}
+
+.searchBar button:hover {
+    background-color: rgba(18, 170, 31, .7);
+    box-shadow: 0.5px 1px black;
+}
