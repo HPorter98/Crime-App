@@ -1,0 +1,9 @@
+.pop{
+    width: 1000px;
+    font-weight: bolder;
+    text-overflow: ellipsis;
+}
+
+.pop li {
+    text-overflow: ellipsis;
+}

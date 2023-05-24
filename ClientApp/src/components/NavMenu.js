@@ -38,6 +38,7 @@ export class NavMenu extends Component {
               <NavItem>
                 <NavLink tag={Link} className="text-dark" to="/fetch-data">Fetch data</NavLink>
               </NavItem>
+              <a href='/counter'>Counter</a>
             </ul>
           </Collapse>
         </Navbar>

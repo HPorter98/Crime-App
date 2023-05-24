@@ -21,7 +21,6 @@ public class CrimeController : ControllerBase
 
     private CrimeStat CreateCrimeRecord(SqlDataReader reader)
     {
-        _logger.LogInformation("New Record Created");
         return new CrimeStat {
             crimeID = (string)reader["Crime_ID"],
             month = (string)reader["Month"],
@@ -39,6 +38,12 @@ public class CrimeController : ControllerBase
 
     private double KilometresToMiles(double km) {
         return km * 0.61237;
+    }
+
+    private void PrintErrorToConsole(Microsoft.Data.SqlClient.SqlException ex) {
+        _logger.LogError("Error Code: " + ex.Number);
+        _logger.LogError("Error Message: " + ex.Message);
+        System.Console.WriteLine("Database Read Failed");
     }
 
     [HttpGet]
@@ -89,10 +94,8 @@ public class CrimeController : ControllerBase
         }
         catch (Microsoft.Data.SqlClient.SqlException ex)
         {
-            Console.WriteLine(ex.Number);
-            System.Console.WriteLine("Database Read Failed");
-            return "Failed";
-            throw;
+            PrintErrorToConsole(ex);
+            return JsonConvert.SerializeObject(new {error = "error"});
         }
     }
 
@@ -126,11 +129,10 @@ public class CrimeController : ControllerBase
                 }
             }
         }
-        catch (System.Exception)
+        catch (Microsoft.Data.SqlClient.SqlException ex)
         {
-            System.Console.WriteLine("Database Read Failed");
-            return "Distinct Types Failed";
-            throw;
+            PrintErrorToConsole(ex);
+            return JsonConvert.SerializeObject(new {error = "error"});
         }
     }
 

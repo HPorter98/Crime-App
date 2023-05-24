@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import Map, { Marker } from 'react-map-gl';
+import Map, { Marker, Popup } from 'react-map-gl';
 import { CrimeInfo } from './CrimeInfo';
 import { Filter } from './Filter';
 import { SearchBar} from './SearchBar';
 
 import "./SearchBar.css";
+import { MarkerPopup } from './MarkerPopup';
 
 export class MapComp extends Component {
     static displayName = MapComp.name;
@@ -21,7 +22,8 @@ export class MapComp extends Component {
             colourMap: null,
             filter: "",
             radius: 0.25,
-            hasSearched: false
+            hasSearched: false,
+            selectedCrime: null
         }
 
         this.mapRef = React.createRef(null);
@@ -67,7 +69,7 @@ export class MapComp extends Component {
         const colours = this.state.crimeTypes;
         if (this.state.crime.crimes?.length > 0) {
             this.state.crime.crimes.map(function (element) {
-                return <Marker key={element.crimeID} color={colours[element.crimeType]} longitude={element.longitude} latitude={element.latitude} anchor='bottom' onClick={() => { console.log(element.crimeType) }} />
+                return <Marker key={element.crimeID} color={colours[element.crimeType]} longitude={element.longitude} latitude={element.latitude} anchor='bottom' onClick={() => { <MarkerPopup />}} />
             })
         } else {
             return <></>;
@@ -100,23 +102,56 @@ export class MapComp extends Component {
                 <Marker color={'#FF0000'} longitude={this.state.lng} latitude={this.state.lat} anchor="bottom" />
                 {this.state.crime.crimes?.length > 0 ? this.state.crime.crimes.map((element) => {
                     if(this.state.filter === element.crimeType) {
+                        // return <Popup longitude={element.longitude} latitude={element.latitude}>
+                        // Pop Up!
+                        // </Popup>
                         return <Marker key={element.crimeID}
                         color={colours[element.crimeType]}
                         longitude={element.longitude}
                         latitude={element.latitude}
                         anchor='bottom'
-                        onClick={() => { console.log(element.crimeType) }}
+                        onClick={(e) => {
+                            console.log("Click");
+                            e.originalEvent.stopPropagation();
+                            this.setState({selectedCrime: element})
+                        }}
                         />
                     } else if (this.state.filter === ""){
+                        // return <Popup longitude={element.longitude} latitude={element.latitude}>
+                        // Pop Up!
+                        // </Popup>
                         return <Marker key={element.crimeID}
                         color={colours[element.crimeType]}
                         longitude={element.longitude}
                         latitude={element.latitude}
                         anchor='bottom'
-                        onClick={() => { console.log(element.crimeType) }}
+                        onClick={(e) => {
+                            console.log("Click");
+                            e.originalEvent.stopPropagation();
+                            this.setState({selectedCrime: element})
+                        }}
                         />
                     }
                 }, this) : <></>}
+                {this.state.selectedCrime && (<Popup
+                anchor='bottom'
+                offset={50}
+                longitude={this.state.selectedCrime.longitude}
+                latitude={this.state.selectedCrime.latitude}
+                onClose={() => this.setState({crimeElement: null})}
+                style={{width: "100px"}}>
+                    {
+                    <MarkerPopup crime={this.state.selectedCrime}/>
+                    /* <div>
+                        <ul>
+                            <li>{this.state.selectedCrime.crimeID}</li>
+                            <li>{this.state.selectedCrime.month}</li>
+                            <li>{this.state.selectedCrime.reportedBy}</li>
+                            <li>{this.state.selectedCrime.lsoaCode}</li>
+                            
+                        </ul>
+                    </div> */}
+                </Popup>)}
             </Map>
         )
     };
@@ -124,29 +159,37 @@ export class MapComp extends Component {
     async populateCrimeType() {
         const response = await fetch(`crime/distinctValues`);
         const data = await response.json();
-
-        const typeMap = new Object();
-        const colourArr = ["#F9A739", "#B9F939", "#65F939", "#734F05", "#177305",
-            "#05734B", "#6B8C80", "#B6B6B6", "#944CF6", "#0A0A0A",
-            "#770000", "#B5802F", "#1BBD62"];
-
-        for (let index = 0; index < data.types.length; index++) {
-            typeMap[data.types[index]] = colourArr[index];
+        console.log(data);
+        if(!data.error) {
+            const typeMap = new Object();
+            const colourArr = ["#F9A739", "#B9F939", "#65F939", "#734F05", "#177305",
+                "#05734B", "#6B8C80", "#B6B6B6", "#944CF6", "#0A0A0A",
+                "#770000", "#B5802F", "#1BBD62"];
+    
+            for (let index = 0; index < data.types.length; index++) {
+                typeMap[data.types[index]] = colourArr[index];
+            }
+    
+            console.log(typeMap);
+    
+            this.setState({crimeTypes: data.types, colourMap: typeMap });   
+        } else {
+            console.log("Error");
         }
-
-        console.log(typeMap);
-
-        this.setState({crimeTypes: data.types, colourMap: typeMap });
     }
 
     async populateCrimeData() {
         const response = await fetch(`crime?lng=${this.lngRef.lng}&lat=${this.latRef.lat}&radius=${this.radiusRef.radius}`);
         const data = await response.json();
-        console.log(data.crimes.length);
-        this.setState({
-            crime: data,
-            hasSearched: true
-        });
+        if(!data.error) {
+            console.log(data.crimes.length);
+            this.setState({
+                crime: data,
+                hasSearched: true
+            });
+        } else {
+            console.log("Error");
+        }
     }
 
     async getLocation() {
