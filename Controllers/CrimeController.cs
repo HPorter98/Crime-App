@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Microsoft.Data.SqlClient;
 using Geolocation;
+using System.Net;
+using System.Net.Http;
 
 namespace Crime_App.Controllers;
 
@@ -47,7 +49,7 @@ public class CrimeController : ControllerBase
     }
 
     [HttpGet]
-    public string Get(string lng, string lat, string radius)
+    public IActionResult Get(string lng, string lat, string radius)
     {
         double radiusInMiles = KilometresToMiles(Convert.ToDouble(radius));
         Console.WriteLine("GET " + lng + " " + lat);
@@ -86,21 +88,24 @@ public class CrimeController : ControllerBase
                         string json = JsonConvert.SerializeObject(new {
                             crimes = _crimes
                         });
-
-                        return json;
+                        
+                        Response.ContentType = "application/json";
+                        return Ok(json);
                     }
                 }
             }
         }
         catch (Microsoft.Data.SqlClient.SqlException ex)
         {
+            
             PrintErrorToConsole(ex);
-            return JsonConvert.SerializeObject(new {error = "error"});
+            return BadRequest();
+            //HttpStatusCode.BadRequest;
         }
     }
 
     [HttpGet("distinctValues")]
-    public string GetDistinctValues(){
+    public IActionResult GetDistinctValues(){
         Console.WriteLine("Hit Distinct");
         try
         {
@@ -124,7 +129,7 @@ public class CrimeController : ControllerBase
                             types = distinctTypes
                         });
 
-                        return json;
+                        return Ok(json);
                     }
                 }
             }
@@ -132,7 +137,7 @@ public class CrimeController : ControllerBase
         catch (Microsoft.Data.SqlClient.SqlException ex)
         {
             PrintErrorToConsole(ex);
-            return JsonConvert.SerializeObject(new {error = "error"});
+            return BadRequest();
         }
     }
 
