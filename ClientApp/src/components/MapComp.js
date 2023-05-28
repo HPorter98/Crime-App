@@ -15,14 +15,13 @@ export class MapComp extends Component {
             lng: -2.587910,
             lat: 51.454514,
             input: "",
-            city:"",
-            county:"",
             crime: [],
             crimeTypes: [],
             colourMap: null,
             filter: "",
             radius: 0.25,
-            hasSearched: false,
+            error: false,
+            errorMessage: "",
             selectedCrime: null
         }
 
@@ -33,8 +32,6 @@ export class MapComp extends Component {
         this.radiusRef = React.createRef({radius : 0});
 
         this.handleInput = this.handleInput.bind(this);
-        this.handleCityInput = this.handleCityInput.bind(this);
-        this.handleCountyInput = this.handleCountyInput.bind(this);
         this.changeLocation = this.changeLocation.bind(this);
         this.getLocation = this.getLocation.bind(this);
         this.renderMap = this.renderMap.bind(this);
@@ -49,13 +46,6 @@ export class MapComp extends Component {
 
     handleInput(stateToChange, event) {
         this.setState({[stateToChange] : event.target.value});
-    }
-
-    handleCityInput(e) {
-        this.setState({ city: e.target.value });
-    }
-    handleCountyInput(e) {
-        this.setState({ county: e.target.value });
     }
 
     changeLocation(lng, lat) {
@@ -141,16 +131,7 @@ export class MapComp extends Component {
                 onClose={() => this.setState({crimeElement: null})}
                 style={{width: "100px"}}>
                     {
-                    <MarkerPopup crime={this.state.selectedCrime}/>
-                    /* <div>
-                        <ul>
-                            <li>{this.state.selectedCrime.crimeID}</li>
-                            <li>{this.state.selectedCrime.month}</li>
-                            <li>{this.state.selectedCrime.reportedBy}</li>
-                            <li>{this.state.selectedCrime.lsoaCode}</li>
-                            
-                        </ul>
-                    </div> */}
+                    <MarkerPopup crime={this.state.selectedCrime}/>}
                 </Popup>)}
             </Map>
         )
@@ -158,9 +139,11 @@ export class MapComp extends Component {
 
     async populateCrimeType() {
         const response = await fetch(`crime/distinctValues`);
-        const data = await response.json();
-        console.log(data);
-        if(!data.error) {
+        if(response.status !== 200) {
+            this.setState({error: true, errorMessage: response.status}); 
+        } else {
+            const data = await response.json();
+            console.log(data);
             const typeMap = new Object();
             const colourArr = ["#F9A739", "#B9F939", "#65F939", "#734F05", "#177305",
                 "#05734B", "#6B8C80", "#B6B6B6", "#944CF6", "#0A0A0A",
@@ -172,32 +155,34 @@ export class MapComp extends Component {
     
             console.log(typeMap);
     
-            this.setState({crimeTypes: data.types, colourMap: typeMap });   
-        } else {
-            console.log("Error");
+            this.setState({crimeTypes: data.types, colourMap: typeMap }); 
         }
     }
 
     async populateCrimeData() {
         const response = await fetch(`crime?lng=${this.lngRef.lng}&lat=${this.latRef.lat}&radius=${this.radiusRef.radius}`);
-        const data = await response.json();
-        if(!data.error) {
-            console.log(data.crimes.length);
+        if(response.status !== 200) {
+            console.log("Error: " + response.status)
             this.setState({
-                crime: data,
-                hasSearched: true
+                error: true,
+                errorMessage: response.status
             });
         } else {
-            console.log("Error");
+            const data = await response.json();
+            this.setState({
+                crime: data,
+                error: false,
+                errorMessage: ""
+            });
         }
     }
 
     async getLocation() {
-        if(this.state.radius != 0) {
-            const userInput = this.state.input + " " + this.state.city + " " + this.state.county;
+        if(this.state.input != "") {
+            // const userInput = this.state.input + " " + this.state.city + " " + this.state.county;
             const accessToken = "pk.eyJ1IjoiaGFycnlwb3J0ZXI5OCIsImEiOiJja3pkMmdsbWIwMzdjMnFucm5sd3ZieWZ4In0.aXsRiKXTFdjc7X4XBFcXOw";
     
-            const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${userInput}.json?access_token=${accessToken}`);
+            const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${this.state.input}.json?access_token=${accessToken}`);
             const data = await response.json();
             console.log("getLocation: " + this.state.input);
     
@@ -213,20 +198,17 @@ export class MapComp extends Component {
     
             this.changeLocation(data.features[0].center[0], data.features[0].center[1]);
         } else {
-            alert("Radius is empty");
+            this.setState({error: true, errorMessage: "Input field is empty"});
         }
     }
 
     render() {
         return (
             <>
-                <h1> Map! </h1>
-                {this.renderMap()}
+                <h1> Avon and Somerset Crime Locator</h1>
                 <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/>
-                <h4>Refine Your Search</h4>
-                <input type='text' placeholder='City' onChange={this.handleCityInput}></input>
-                <input type='text' placeholder='County' onChange={this.handleCountyInput}></input>
-
+                {this.renderMap()}
+                {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
                 {this.state.crime.crimes?.length > 0 ? 
                         <CrimeInfo crimes={this.state.crime.crimes} filter={<Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>}/>
                         : <p>Data not found</p>}

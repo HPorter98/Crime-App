@@ -88,8 +88,6 @@ public class CrimeController : ControllerBase
                         string json = JsonConvert.SerializeObject(new {
                             crimes = _crimes
                         });
-                        
-                        Response.ContentType = "application/json";
                         return Ok(json);
                     }
                 }

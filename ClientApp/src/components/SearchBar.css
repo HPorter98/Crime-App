@@ -1,16 +1,14 @@
 .searchBar {
     margin-top: 10px;
-    background-color: pink;
-    height: 75px;
+    margin-bottom: 10px;
+    height: 50px;
     width: 50%;
-    padding: 15px;
-}
-
-.searchBar input{
+    padding-top: 15px;
 }
 
 .searchBar label {
     margin-right: 10px;
+    margin-left: 10px;
     font-weight: bold;
 }
 
