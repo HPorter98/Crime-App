@@ -1,0 +1,14 @@
+.MainBody {
+    display: grid;
+    border: 1px solid black;
+}
+
+.map {
+    border: 1px solid black;
+    display: grid;
+    grid-template-columns: 725px auto;
+}
+
+.errorText {
+    grid-row-start: 3;
+}

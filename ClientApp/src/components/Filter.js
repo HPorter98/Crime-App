@@ -1,6 +1,5 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import './Filter.css';
-import { event } from 'jquery';
 
 // export function Filter(props) {
 //     const [hasReset, updateReset] = useState(false);
@@ -64,16 +63,17 @@ export class Filter extends Component {
                             key={element} 
                             type='checkbox'
                             value={element}
-                            checked={(this.state.selectedFilter == element)}
+                            checked={(this.state.selectedFilter === element)}
                             onChange={this.setParentFilter}
                         
                         /> {element}
-                        <div className='colourCode' style={{backgroundColor: this.props.colourMap[element]}}>&nbsp;</div>
+                        {/* <div className='colourCode' style={{backgroundColor: this.props.colourMap[element]}}>&nbsp;</div> */}
                     </div>
 
                 }, this) : <p>Types not found</p>}
+                <button onClick={this.handleReset} className='item'>Reset Filter</button>
             </div>
-            <button onClick={this.handleReset}>Reset Filter</button>
+            
             </>
         );
     }

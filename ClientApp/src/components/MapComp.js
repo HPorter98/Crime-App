@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import Map, { Marker, Popup } from 'react-map-gl';
-import { CrimeInfo } from './CrimeInfo';
 import { Filter } from './Filter';
 import { SearchBar} from './SearchBar';
 
 import "./SearchBar.css";
+import "./MapComp.css";
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { MarkerPopup } from './MarkerPopup';
 
 export class MapComp extends Component {
@@ -84,7 +85,7 @@ export class MapComp extends Component {
                     latitude: 51.454514,
                     zoom: 14
                 }}
-                style={{ width: 1100, height: 400 }}
+                style={{ width: 'auto', height: 400 }}
                 mapStyle="mapbox://styles/mapbox/streets-v12"
                 mapboxAccessToken='pk.eyJ1IjoiaGFycnlwb3J0ZXI5OCIsImEiOiJja3pkMmdsbWIwMzdjMnFucm5sd3ZieWZ4In0.aXsRiKXTFdjc7X4XBFcXOw'
                 ref={this.mapRef}>
@@ -121,7 +122,7 @@ export class MapComp extends Component {
                             this.setState({selectedCrime: element})
                         }}
                         />
-                    }
+                    } else {return 0}
                 }, this) : <></>}
                 {this.state.selectedCrime && (<Popup
                 anchor='bottom'
@@ -144,7 +145,8 @@ export class MapComp extends Component {
         } else {
             const data = await response.json();
             console.log(data);
-            const typeMap = new Object();
+            const typeMap = {}
+
             const colourArr = ["#F9A739", "#B9F939", "#65F939", "#734F05", "#177305",
                 "#05734B", "#6B8C80", "#B6B6B6", "#944CF6", "#0A0A0A",
                 "#770000", "#B5802F", "#1BBD62"];
@@ -178,7 +180,7 @@ export class MapComp extends Component {
     }
 
     async getLocation() {
-        if(this.state.input != "") {
+        if(this.state.input !== "") {
             // const userInput = this.state.input + " " + this.state.city + " " + this.state.county;
             const accessToken = "pk.eyJ1IjoiaGFycnlwb3J0ZXI5OCIsImEiOiJja3pkMmdsbWIwMzdjMnFucm5sd3ZieWZ4In0.aXsRiKXTFdjc7X4XBFcXOw";
     
@@ -206,12 +208,18 @@ export class MapComp extends Component {
         return (
             <>
                 <h1> Avon and Somerset Crime Locator</h1>
-                <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/>
-                {this.renderMap()}
-                {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
-                {this.state.crime.crimes?.length > 0 ? 
-                        <CrimeInfo crimes={this.state.crime.crimes} filter={<Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>}/>
-                        : <p>Data not found</p>}
+                <div className='MainBody'>
+                    <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/>
+                    <div className='map'>
+                    {this.renderMap()}
+                    
+                    {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
+                    <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
+                    {/* {this.state.crime.crimes?.length > 0 ? 
+                            <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
+                            : <></>} */}
+                    </div>
+                </div>
             </>
         )
     };

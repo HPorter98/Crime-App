@@ -1,9 +1,10 @@
 .searchBar {
+    border: 1px solid black;
+    float: none;
     margin-top: 10px;
     margin-bottom: 10px;
-    height: 50px;
-    width: 50%;
     padding-top: 15px;
+    grid-row-start: 1;
 }
 
 .searchBar label {

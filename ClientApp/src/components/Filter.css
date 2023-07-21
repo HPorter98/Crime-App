@@ -1,20 +1,32 @@
 .filter {
     padding: 5px;
     display: grid;
-    grid-template-columns: repeat(2, 250px);
+    grid-template-columns: repeat(2, 185px);
     border: 1px solid black;
-    width: 50%;
+    float: none;
+    margin: 0;
+    
+    
 }
 
 .item {
-    font-size: .90em;
-    height: 50px;
+    font-size: 1em;
+    font-weight:700;
+    height: 25px;
     margin-right: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 1px;
+    margin-top: 1px;
 }
 
 .colourCode {
     margin: auto;
     float: right;
     width: 20px;
+    height: 23px;
+}
+
+.resetButton {
+    margin: auto;
+    border: 1px solid white;
+    width: 50%;
 }
