@@ -1,9 +1,9 @@
-.pop{
-    width: 1000px;
+.mapboxgl-popup-content {
+    overflow-wrap: break-word;
+    border: 2px solid black;
     font-weight: bolder;
-    text-overflow: ellipsis;
-}
-
-.pop li {
-    text-overflow: ellipsis;
+    width: 300px;
+    height: 225px;
+    font-size: larger;
+    border-radius: 5px;
 }

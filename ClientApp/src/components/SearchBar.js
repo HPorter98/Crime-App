@@ -27,6 +27,12 @@ export class SearchBar extends Component {
                     <option value={2}>2</option>
                 </select>
                 <button onClick={this.props.getLocation}>Find Crimes</button>
+                {/* <div className="hover-container">
+                <p className="hover-target">hover over this</p>
+                <aside className="hover-popup">
+                    <p>aside element</p>
+                </aside>
+                </div> */}
             </div>
         )
     }

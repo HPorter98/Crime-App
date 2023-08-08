@@ -11,15 +11,13 @@ export class MarkerPopup extends Component {
   render() {
     let crime = this.props.crime;
     return (
-      <div className='pop'>
-        <ul>
-          <li>{crime.crimeID}</li>
-          <li>{crime.crimeType}</li>
-          <li>{crime.month}</li>
-          <li>{crime.reportedBy}</li>
-        </ul>
+      <>
+      <h4>{crime.location}</h4>
+        <p>ID: {crime.crimeID}</p>
+        <p>Crime: {crime.crimeType}</p>
+        <p>Date: {crime.month}</p>
         
-      </div>
+      </>
     );
   }
 }

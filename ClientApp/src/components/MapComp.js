@@ -100,7 +100,7 @@ export class MapComp extends Component {
                         color={colours[element.crimeType]}
                         longitude={element.longitude}
                         latitude={element.latitude}
-                        anchor='bottom'
+                        anchor="bottom-right"
                         onClick={(e) => {
                             console.log("Click");
                             e.originalEvent.stopPropagation();
@@ -208,16 +208,15 @@ export class MapComp extends Component {
         return (
             <>
                 <h1> Avon and Somerset Crime Locator</h1>
+                <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/>
                 <div className='MainBody'>
-                    <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/>
-                    <div className='map'>
-                    {this.renderMap()}
+                    <div className='mapBody'>
+                        <div className='map'>
+                            {this.renderMap()}
+                        </div>
                     
-                    {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
-                    <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
-                    {/* {this.state.crime.crimes?.length > 0 ? 
-                            <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
-                            : <></>} */}
+                        {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
+                        <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
                     </div>
                 </div>
             </>
