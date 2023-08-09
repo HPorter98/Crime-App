@@ -6,7 +6,7 @@ import { SearchBar} from './SearchBar';
 import "./SearchBar.css";
 import "./MapComp.css";
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { MarkerPopup } from './MarkerPopup';
+import { PopupContent } from './PopupContent';
 
 export class MapComp extends Component {
     static displayName = MapComp.name;
@@ -60,7 +60,7 @@ export class MapComp extends Component {
         const colours = this.state.crimeTypes;
         if (this.state.crime.crimes?.length > 0) {
             this.state.crime.crimes.map(function (element) {
-                return <Marker key={element.crimeID} color={colours[element.crimeType]} longitude={element.longitude} latitude={element.latitude} anchor='bottom' onClick={() => { <MarkerPopup />}} />
+                return <Marker key={element.crimeID} color={colours[element.crimeType]} longitude={element.longitude} latitude={element.latitude} anchor='bottom' onClick={() => { <PopupContent />}} />
             })
         } else {
             return <></>;
@@ -87,7 +87,7 @@ export class MapComp extends Component {
                 }}
                 style={{ width: 'auto', height: 400 }}
                 mapStyle="mapbox://styles/mapbox/streets-v12"
-                mapboxAccessToken='pk.eyJ1IjoiaGFycnlwb3J0ZXI5OCIsImEiOiJja3pkMmdsbWIwMzdjMnFucm5sd3ZieWZ4In0.aXsRiKXTFdjc7X4XBFcXOw'
+                mapboxAccessToken= {process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
                 ref={this.mapRef}>
 
                 <Marker color={'#FF0000'} longitude={this.state.lng} latitude={this.state.lat} anchor="bottom" />
@@ -108,9 +108,6 @@ export class MapComp extends Component {
                         }}
                         />
                     } else if (this.state.filter === ""){
-                        // return <Popup longitude={element.longitude} latitude={element.latitude}>
-                        // Pop Up!
-                        // </Popup>
                         return <Marker key={element.crimeID}
                         color={colours[element.crimeType]}
                         longitude={element.longitude}
@@ -132,7 +129,7 @@ export class MapComp extends Component {
                 onClose={() => this.setState({crimeElement: null})}
                 style={{width: "100px"}}>
                     {
-                    <MarkerPopup crime={this.state.selectedCrime}/>}
+                    <PopupContent crime={this.state.selectedCrime}/>}
                 </Popup>)}
             </Map>
         )
@@ -181,8 +178,7 @@ export class MapComp extends Component {
 
     async getLocation() {
         if(this.state.input !== "") {
-            // const userInput = this.state.input + " " + this.state.city + " " + this.state.county;
-            const accessToken = "pk.eyJ1IjoiaGFycnlwb3J0ZXI5OCIsImEiOiJja3pkMmdsbWIwMzdjMnFucm5sd3ZieWZ4In0.aXsRiKXTFdjc7X4XBFcXOw";
+            const accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
     
             const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${this.state.input}.json?access_token=${accessToken}`);
             const data = await response.json();

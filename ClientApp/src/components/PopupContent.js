@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import './MarkerPopup.css';
+import './PopupContent.css';
 
-export class MarkerPopup extends Component {
-  static displayName = MarkerPopup.name;
+export class PopupContent extends Component {
+  static displayName = PopupContent.name;
   constructor(props) {
     super(props)
     this.state = {
