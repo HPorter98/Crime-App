@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Map, { Marker, Popup } from 'react-map-gl';
 import { Filter } from './Filter';
 import { SearchBar} from './SearchBar';
+import { Row, Col } from 'reactstrap';
 
 import "./SearchBar.css";
 import "./MapComp.css";
@@ -85,7 +86,7 @@ export class MapComp extends Component {
                     latitude: 51.454514,
                     zoom: 14
                 }}
-                style={{ width: 'auto', height: 400 }}
+                style={{ width: 'inherit', height: 400}}
                 mapStyle="mapbox://styles/mapbox/streets-v12"
                 mapboxAccessToken= {process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
                 ref={this.mapRef}>
@@ -204,8 +205,26 @@ export class MapComp extends Component {
         return (
             <>
                 <h1> Avon and Somerset Crime Locator</h1>
-                <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/>
-                <div className='MainBody'>
+                <Row>
+                    <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/>
+                </Row>
+                
+                {/* <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/> */}
+                <Row>
+                    <div className='MainBody'>
+                        <div className='mapBody'>
+                            <div className='map'>
+                                {this.renderMap()}
+                            </div>
+                        
+                            {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
+                            {/* <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/> */}
+                        </div>
+                    </div>
+                </Row>
+                
+                <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
+                {/* <div className='MainBody'>
                     <div className='mapBody'>
                         <div className='map'>
                             {this.renderMap()}
@@ -214,7 +233,7 @@ export class MapComp extends Component {
                         {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
                         <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
                     </div>
-                </div>
+                </div> */}
             </>
         )
     };

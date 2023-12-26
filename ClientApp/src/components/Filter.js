@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Row, Col } from 'reactstrap';
 import './Filter.css';
 
 // export function Filter(props) {
@@ -56,9 +57,9 @@ export class Filter extends Component {
     render() {
         return (
             <>
-            <div className='filter'>
+            <Row>
                 {this.props.crimeTypes.length > 0 ? this.props.crimeTypes.map(function (element) {
-                    return <div className='item'>
+                    return <Col xs="3" md="3">
                         <input 
                             key={element} 
                             type='checkbox'
@@ -68,11 +69,11 @@ export class Filter extends Component {
                         
                         /> {element}
                         {/* <div className='colourCode' style={{backgroundColor: this.props.colourMap[element]}}>&nbsp;</div> */}
-                    </div>
+                    </Col>
 
                 }, this) : <p>Types not found</p>}
-                <button onClick={this.handleReset} className='item'>Reset Filter</button>
-            </div>
+            </Row>
+            <button onClick={this.handleReset} className='resetButton'>Reset Filter</button>
             
             </>
         );

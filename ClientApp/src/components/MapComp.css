@@ -3,8 +3,7 @@
 }
 
 .mapBody {
-    display: grid;
-    grid-template-columns: 70% 30%;
+    width: inherit;
 }
 
 .map { 

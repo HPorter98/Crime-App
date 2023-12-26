@@ -13,7 +13,7 @@
 .item {
     font-size: 1em;
     font-weight:700;
-    height: 25px;
+    height: 30px;
     margin-right: 10px;
     margin-bottom: 1px;
     margin-top: 1px;
@@ -27,7 +27,15 @@
 }
 
 .resetButton {
-    margin: auto;
-    border: 1px solid white;
-    width: 50%;
+    font-size: 1em;
+    font-weight: 700;
+    border: none;
+    background-color: rgba(217, 215, 215, .5);
+    height: 30px;
+    width: 150px;
+    border-radius: 5px;   
+}
+
+.resetButton:hover {
+    background-color: rgba(217, 215, 215, 1);
 }
