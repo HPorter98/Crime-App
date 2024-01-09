@@ -108,7 +108,7 @@ public class CrimeController : ControllerBase
         try
         {
             string query = "SELECT DISTINCT Crime_type FROM CrimeStats";
-            List<string> distinctTypes = new List<string>();
+            List<string> distinctTypes = new ();
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -139,5 +139,44 @@ public class CrimeController : ControllerBase
         }
     }
 
+    [HttpGet("radiusBoundaries")]
+    public IActionResult GetRadiusBoundaries(){
+        string query = "SELECT Min(Longitude) AS MinLongitude, Max(Longitude) AS MaxLongitude, Min(Latitude) AS MinLatitude, Max(Latitude) AS MaxLatitude FROM CrimeStats;";
+        List<string> boundaries = new();
 
+        try{
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // System.Console.WriteLine(reader[0]);
+                            Console.WriteLine("MinLongitude " + reader["MinLongitude"]);
+                            Console.WriteLine("MaxLongitude " + reader["MaxLongitude"]);
+                            Console.WriteLine("MinLatitude " + reader["MinLatitude"]);
+                            Console.WriteLine("MaxLatitude " + reader["MaxLatitude"]);
+                            boundaries.Add(Convert.ToString(reader["MinLongitude"]));
+                            boundaries.Add(Convert.ToString(reader["MaxLongitude"]));
+                            boundaries.Add(Convert.ToString(reader["MinLatitude"]));
+                            boundaries.Add(Convert.ToString(reader["MaxLatitude"]));
+                        }
+
+                        string json = JsonConvert.SerializeObject(new {
+                            bounds = boundaries
+                        });
+                        return Ok(json);
+                    }
+                }
+            }
+        }
+        catch (SqlException ex)
+        {
+            PrintErrorToConsole(ex);
+            return BadRequest();
+        }
+    }
 }

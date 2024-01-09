@@ -6,7 +6,7 @@ import { Row, Col } from 'reactstrap';
 
 import "./SearchBar.css";
 import "./MapComp.css";
-import 'mapbox-gl/dist/mapbox-gl.css';
+import "mapbox-gl/dist/mapbox-gl.css";
 import { PopupContent } from './PopupContent';
 
 export class MapComp extends Component {
@@ -16,6 +16,10 @@ export class MapComp extends Component {
         this.state = {
             lng: -2.587910,
             lat: 51.454514,
+            maxLng: 0,
+            minLng: 0,
+            maxLat: 0,
+            minLat: 0,
             input: "",
             crime: [],
             crimeTypes: [],
@@ -24,7 +28,8 @@ export class MapComp extends Component {
             radius: 0.25,
             error: false,
             errorMessage: "",
-            selectedCrime: null
+            selectedCrime: null,
+            hasSearched: false
         }
 
         this.mapRef = React.createRef(null);
@@ -35,15 +40,18 @@ export class MapComp extends Component {
 
         this.handleInput = this.handleInput.bind(this);
         this.changeLocation = this.changeLocation.bind(this);
+        this.withinRange = this.withinRange.bind(this);
         this.getLocation = this.getLocation.bind(this);
         this.renderMap = this.renderMap.bind(this);
         this.returnMarkers = this.returnMarkers.bind(this);
         this.setFilter = this.setFilter.bind(this);
         this.resetFilter = this.resetFilter.bind(this);
+        this.handleRadiusChange = this.handleRadiusChange.bind(this);
     }
 
     componentDidMount() {
         this.populateCrimeType();
+        this.getRadiusBoundaries();
     }
 
     handleInput(stateToChange, event) {
@@ -77,6 +85,15 @@ export class MapComp extends Component {
         this.setState({ filter : ""})
     }
 
+    handleRadiusChange(stateToChange, event) {
+        this.setState({[stateToChange] : event.target.value},
+             () => {
+                if (this.state.hasSearched) {
+                    this.getLocation();
+                }
+             });
+    }
+
     renderMap() {
         const colours = this.state.colourMap;
         return (
@@ -86,12 +103,16 @@ export class MapComp extends Component {
                     latitude: 51.454514,
                     zoom: 14
                 }}
-                style={{ width: 'inherit', height: 400}}
+                style={{ width: 'inherit', height: 400, borderRadius: 10}}
                 mapStyle="mapbox://styles/mapbox/streets-v12"
                 mapboxAccessToken= {process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
                 ref={this.mapRef}>
 
                 <Marker color={'#FF0000'} longitude={this.state.lng} latitude={this.state.lat} anchor="bottom" />
+                <Marker color={'#00018B'} longitude={-3.621494} latitude={51.076515} anchor="bottom" />
+                <Marker color={'#00008B'} longitude={-2.070337} latitude={51.898127} anchor="bottom" />
+                <Marker color={'#00008B'} longitude={-2.424529} latitude={50.549723} anchor="bottom" />
+                <Marker color={'#00008B'} longitude={-2.070337} latitude={51.898127} anchor="bottom" />
                 {this.state.crime.crimes?.length > 0 ? this.state.crime.crimes.map((element) => {
                     if(this.state.filter === element.crimeType) {
                         // return <Popup longitude={element.longitude} latitude={element.latitude}>
@@ -120,7 +141,7 @@ export class MapComp extends Component {
                             this.setState({selectedCrime: element})
                         }}
                         />
-                    } else {return 0}
+                    }
                 }, this) : <></>}
                 {this.state.selectedCrime && (<Popup
                 anchor='bottom'
@@ -159,6 +180,24 @@ export class MapComp extends Component {
         }
     }
 
+    async getRadiusBoundaries(){
+        const response = await fetch(`crime/radiusBoundaries`);
+        if(response.status !== 200) {
+            this.setState({error: true, errorMessage: response.status}); 
+        } else {
+            const data = await response.json();
+            console.log(data);
+
+            // The boundaries array has a structure of [minLng, maxLng, minLat, maxLat]
+            this.setState({
+                minLng: parseFloat(data.bounds[0]),
+                maxLng: parseFloat(data.bounds[1]),
+                minLat: parseFloat(data.bounds[2]),
+                maxLat: parseFloat(data.bounds[3])
+            });
+        }
+    }
+
     async populateCrimeData() {
         const response = await fetch(`crime?lng=${this.lngRef.lng}&lat=${this.latRef.lat}&radius=${this.radiusRef.radius}`);
         if(response.status !== 200) {
@@ -177,25 +216,46 @@ export class MapComp extends Component {
         }
     }
 
+    withinRange(x, min, max) {
+        return x >= min && x <= max;
+    }
+
     async getLocation() {
+        
         if(this.state.input !== "") {
             const accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
     
+            // Retrieve data from backend
             const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${this.state.input}.json?access_token=${accessToken}`);
             const data = await response.json();
-            console.log("getLocation: " + this.state.input);
-    
+
             console.log(data);
-    
+            
+            // Set longtitude, latitude and radius ref points
             this.lngRef = { lng: data.features[0].center[0] };
             this.latRef = { lat: data.features[0].center[1] };
             this.radiusRef = {radius: this.state.radius};
-    
-            this.setState({ lng: data.features[0].center[0], lat: data.features[0].center[1] });
-    
-            await this.populateCrimeData();
-    
-            this.changeLocation(data.features[0].center[0], data.features[0].center[1]);
+
+            console.log(this.withinRange(0.5, 0, 1));
+            console.log("Boundaries lat-lng",this.state.minLat, this.state.maxLat, this.state.minLng, this.state.maxLng);
+            console.log("target", parseFloat(this.lngRef.lng), parseFloat(this.latRef.lat));
+
+            console.log(this.withinRange(parseFloat(this.lngRef.lng), this.state.minLng, this.state.maxLng));
+            console.log(this.withinRange(parseFloat(this.latRef.lat), this.state.minLat, this.state.maxLat));
+
+
+            if (this.withinRange(parseFloat(this.lngRef.lng), this.state.minLng, this.state.maxLng) && this.withinRange(parseFloat(this.latRef.lat), this.state.minLat, this.state.maxLat)) {
+                console.log("Within Bounds!");
+                
+                // Set longtitude, latitude and hasSearched in state
+                this.setState({ lng: data.features[0].center[0], lat: data.features[0].center[1], hasSearched: true});
+        
+                // Set crime data in state
+                await this.populateCrimeData();
+                
+                // Change location on the map
+                this.changeLocation(data.features[0].center[0], data.features[0].center[1]);
+            } else {console.log("Out of bounds!");}
         } else {
             this.setState({error: true, errorMessage: "Input field is empty"});
         }
@@ -203,38 +263,30 @@ export class MapComp extends Component {
 
     render() {
         return (
-            <>
+            <div className='contentContainer'>
                 <h1> Avon and Somerset Crime Locator</h1>
-                <Row>
-                    <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/>
+                <Row style={{paddingBottom: "10px"}}>
+                    <SearchBar handleInput={this.handleInput} handleRadiusChange={this.handleRadiusChange} getLocation={this.getLocation}/>
                 </Row>
                 
                 {/* <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/> */}
                 <Row>
-                    <div className='MainBody'>
-                        <div className='mapBody'>
-                            <div className='map'>
-                                {this.renderMap()}
-                            </div>
-                        
-                            {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
-                            {/* <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/> */}
-                        </div>
-                    </div>
-                </Row>
-                
-                <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
-                {/* <div className='MainBody'>
-                    <div className='mapBody'>
-                        <div className='map'>
-                            {this.renderMap()}
-                        </div>
-                    
-                        {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
+                    <Col md="3">
                         <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
-                    </div>
-                </div> */}
-            </>
+                    </Col>
+                    <Col>
+                        <div className='MainBody'>
+                            <div className='mapBody'>
+                                <div className='map'>
+                                    {this.renderMap()}
+                                </div>
+                            
+                                {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
+                            </div>
+                        </div>
+                    </Col>
+                </Row>
+            </div>
         )
     };
 };

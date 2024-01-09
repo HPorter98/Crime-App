@@ -1,39 +1,32 @@
-.filter {
-    padding: 5px;
-    display: grid;
-    grid-template-columns: repeat(2, 185px);
-    border: 1px solid black;
-    float: none;
-    height: 100%;
-    margin: auto;
-    
-    
+.filterContainer {
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
 }
-
-.item {
-    font-size: 1em;
-    font-weight:700;
-    height: 30px;
-    margin-right: 10px;
-    margin-bottom: 1px;
-    margin-top: 1px;
-}
-
 .colourCode {
-    margin: auto;
-    float: right;
+    margin-top: 5px;
+    float:right;
+    border: 1px solid black;
     width: 20px;
-    height: 23px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.form-check {
+    padding-bottom: 5px;
+    box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
+    margin-bottom: 5px;
 }
 
 .resetButton {
+    position: relative;
     font-size: 1em;
     font-weight: 700;
     border: none;
     background-color: rgba(217, 215, 215, .5);
     height: 30px;
     width: 150px;
-    border-radius: 5px;   
+    border-radius: 5px; 
+    margin-bottom: 5px;  
 }
 
 .resetButton:hover {
