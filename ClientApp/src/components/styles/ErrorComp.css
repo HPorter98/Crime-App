@@ -1,0 +1,10 @@
+.alert{
+    display: inline-block;
+    font-size: 1.10em;
+    font-weight: bold;
+    width:fit-content;
+    height: 30px;
+    padding: 0px 5px 0px 5px;
+    margin: 0px 0px 0px 5px;
+    text-align: center;
+}

@@ -1,39 +1,6 @@
 import React, { Component } from 'react';
-import { Row, Col, Collapse, NavbarToggler } from 'reactstrap';
-import './Filter.css';
-
-// export function Filter(props) {
-//     const [hasReset, updateReset] = useState(false);
-
-//     const handleReset = _ => {
-//         props.resetFilter();
-//         updateReset(!hasReset);
-//     }
-//     const setParentFilter = (e) => {
-//         props.setFilter(e.target.value)
-//     }
-//     return (
-//         <>
-//         <div className='filter'>
-//             {console.log(props)}
-//             {props.crimeTypes.length > 0 ? props.crimeTypes.map(function (element, id = 0) {
-//                 id++;
-//                 return <div className='item'>
-//                     <input 
-//                         key={element} 
-//                         type='checkbox'
-//                         value={element}
-//                         onChange={setParentFilter}
-                    
-//                     /> {element}
-//                 </div>
-
-//             }, this) : <p>Types not found</p>}
-//         </div>
-//         <button onClick={handleReset}>Reset Filter</button>
-//         </>
-//     );
-// }
+import { Row } from 'reactstrap';
+import './styles/Filter.css';
 
 export class Filter extends Component {
     static displayName = Filter.name;

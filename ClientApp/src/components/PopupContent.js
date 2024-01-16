@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './PopupContent.css';
+import './styles/PopupContent.css';
 
 export class PopupContent extends Component {
   static displayName = PopupContent.name;

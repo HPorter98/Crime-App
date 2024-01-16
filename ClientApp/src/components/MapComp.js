@@ -4,8 +4,7 @@ import { Filter } from './Filter';
 import { SearchBar} from './SearchBar';
 import { Row, Col } from 'reactstrap';
 
-import "./SearchBar.css";
-import "./MapComp.css";
+import "./styles/MapComp.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { PopupContent } from './PopupContent';
 
@@ -43,6 +42,7 @@ export class MapComp extends Component {
         this.withinRange = this.withinRange.bind(this);
         this.getLocation = this.getLocation.bind(this);
         this.renderMap = this.renderMap.bind(this);
+        this.resizeMap = this.resizeMap.bind(this);
         this.returnMarkers = this.returnMarkers.bind(this);
         this.setFilter = this.setFilter.bind(this);
         this.resetFilter = this.resetFilter.bind(this);
@@ -109,53 +109,53 @@ export class MapComp extends Component {
                 ref={this.mapRef}>
 
                 <Marker color={'#FF0000'} longitude={this.state.lng} latitude={this.state.lat} anchor="bottom" />
-                <Marker color={'#00018B'} longitude={-3.621494} latitude={51.076515} anchor="bottom" />
-                <Marker color={'#00008B'} longitude={-2.070337} latitude={51.898127} anchor="bottom" />
-                <Marker color={'#00008B'} longitude={-2.424529} latitude={50.549723} anchor="bottom" />
-                <Marker color={'#00008B'} longitude={-2.070337} latitude={51.898127} anchor="bottom" />
                 {this.state.crime.crimes?.length > 0 ? this.state.crime.crimes.map((element) => {
                     if(this.state.filter === element.crimeType) {
-                        // return <Popup longitude={element.longitude} latitude={element.latitude}>
-                        // Pop Up!
-                        // </Popup>
                         return <Marker key={element.crimeID}
-                        color={colours[element.crimeType]}
-                        longitude={element.longitude}
-                        latitude={element.latitude}
-                        anchor="bottom-right"
-                        onClick={(e) => {
-                            console.log("Click");
-                            e.originalEvent.stopPropagation();
-                            this.setState({selectedCrime: element})
-                        }}
+                            color={colours[element.crimeType]}
+                            longitude={element.longitude}
+                            latitude={element.latitude}
+                            anchor="bottom-right"
+                            onClick={(e) => {
+                                console.log("Click");
+                                e.originalEvent.stopPropagation();
+                                this.setState({selectedCrime: element})
+                            }}
                         />
                     } else if (this.state.filter === ""){
                         return <Marker key={element.crimeID}
-                        color={colours[element.crimeType]}
-                        longitude={element.longitude}
-                        latitude={element.latitude}
-                        anchor='bottom'
-                        onClick={(e) => {
-                            console.log("Click");
-                            e.originalEvent.stopPropagation();
-                            this.setState({selectedCrime: element})
-                        }}
+                            color={colours[element.crimeType]}
+                            longitude={element.longitude}
+                            latitude={element.latitude}
+                            anchor='bottom'
+                            onClick={(e) => {
+                                console.log("Click");
+                                e.originalEvent.stopPropagation();
+                                this.setState({selectedCrime: element})
+                            }}
                         />
                     }
                 }, this) : <></>}
-                {this.state.selectedCrime && (<Popup
-                anchor='bottom'
-                offset={50}
-                longitude={this.state.selectedCrime.longitude}
-                latitude={this.state.selectedCrime.latitude}
-                onClose={() => this.setState({crimeElement: null})}
-                style={{width: "100px"}}>
-                    {
-                    <PopupContent crime={this.state.selectedCrime}/>}
-                </Popup>)}
-            </Map>
-        )
-    };
+                {this.state.selectedCrime && (
+                    <Popup
+                        anchor='bottom'
+                        offset={50}
+                        longitude={this.state.selectedCrime.longitude}
+                        latitude={this.state.selectedCrime.latitude}
+                        onClose={() => this.setState({crimeElement: null})}
+                        style={{width: "100px"}}
+                    >
+                        {<PopupContent crime={this.state.selectedCrime}/>}
+                    </Popup>)}
+                </Map>
+            )
+        };
+    
+    resizeMap() {
+        this.mapRef.current.on('load', function () {
+            this.mapRef.current.resize();
+        })
+    }
 
     async populateCrimeType() {
         const response = await fetch(`crime/distinctValues`);
@@ -236,16 +236,8 @@ export class MapComp extends Component {
             this.latRef = { lat: data.features[0].center[1] };
             this.radiusRef = {radius: this.state.radius};
 
-            console.log(this.withinRange(0.5, 0, 1));
-            console.log("Boundaries lat-lng",this.state.minLat, this.state.maxLat, this.state.minLng, this.state.maxLng);
-            console.log("target", parseFloat(this.lngRef.lng), parseFloat(this.latRef.lat));
-
-            console.log(this.withinRange(parseFloat(this.lngRef.lng), this.state.minLng, this.state.maxLng));
-            console.log(this.withinRange(parseFloat(this.latRef.lat), this.state.minLat, this.state.maxLat));
-
-
             if (this.withinRange(parseFloat(this.lngRef.lng), this.state.minLng, this.state.maxLng) && this.withinRange(parseFloat(this.latRef.lat), this.state.minLat, this.state.maxLat)) {
-                console.log("Within Bounds!");
+                this.setState({error: false, errorMessage: ""});
                 
                 // Set longtitude, latitude and hasSearched in state
                 this.setState({ lng: data.features[0].center[0], lat: data.features[0].center[1], hasSearched: true});
@@ -255,7 +247,9 @@ export class MapComp extends Component {
                 
                 // Change location on the map
                 this.changeLocation(data.features[0].center[0], data.features[0].center[1]);
-            } else {console.log("Out of bounds!");}
+            } else {
+                this.setState({error: true, errorMessage: "Input invalid. Try to be more precise"});
+            }
         } else {
             this.setState({error: true, errorMessage: "Input field is empty"});
         }
@@ -266,10 +260,14 @@ export class MapComp extends Component {
             <div className='contentContainer'>
                 <h1> Avon and Somerset Crime Locator</h1>
                 <Row style={{paddingBottom: "10px"}}>
-                    <SearchBar handleInput={this.handleInput} handleRadiusChange={this.handleRadiusChange} getLocation={this.getLocation}/>
+                    <SearchBar 
+                        errorMessage = {this.state.errorMessage}
+                        error = {this.state.error} 
+                        handleInput = {this.handleInput}
+                        handleRadiusChange = {this.handleRadiusChange}
+                        getLocation = {this.getLocation}
+                    />
                 </Row>
-                
-                {/* <SearchBar handleInput={this.handleInput} getLocation={this.getLocation}/> */}
                 <Row>
                     <Col md="3">
                         <Filter crimeTypes={this.state.crimeTypes} setFilter={this.setFilter} resetFilter={this.resetFilter} colourMap={this.state.colourMap}/>
@@ -280,8 +278,6 @@ export class MapComp extends Component {
                                 <div className='map'>
                                     {this.renderMap()}
                                 </div>
-                            
-                                {this.state.error ? <p>Error: {this.state.errorMessage}</p> : <></>}
                             </div>
                         </div>
                     </Col>
